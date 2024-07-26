@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,33 +37,39 @@ data class ShoppingItem(
 
 @Composable
 fun ShoppingListApp() {
-    var sItems by remember { mutableStateOf(listOf<ShoppingItem>()) }
+    var sItem by remember { mutableStateOf(listOf<ShoppingItem>()) }
     var showDialog by remember { mutableStateOf(false) }
     var itemName by remember { mutableStateOf("") }
     var itemQuantity by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
         Button(
             onClick = { showDialog = true },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(text = "Add Item")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            items(sItems) {
-                ShoppingListItem(item = it, onEditClick = {}, onDeleteClick = {})
+            items(sItem) {
+                ShoppingListItem(it,{},{})
             }
         }
     }
 
+    //AlertDialog use for Add Items...
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -73,31 +80,33 @@ fun ShoppingListApp() {
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Button(
-                        onClick = {
-                            if (itemName.isNotBlank()){
-                                val newItem = ShoppingItem(
-                                    id = sItems.size+1,
-                                    name = itemName,
-                                    quantity = itemQuantity.toInt()
-                                )
-                                sItems = sItems + newItem
-                                showDialog = false
-                                itemName = ""
-                                itemQuantity = ""
-                            }
+                    //Add Button on AlertDialog & is checked itemName is blank or not.
+                    Button(onClick = {
+                        if (itemName.isNotBlank() && itemQuantity.isNotBlank()){
+                            val newItem = ShoppingItem(
+                                id = sItem.size + 1,
+                                name = itemName,
+                                quantity = itemQuantity.toInt()
+                            )
+                            sItem = sItem + newItem
+                            showDialog = false
+                            itemName = ""
+                            itemQuantity = ""
                         }
-                    ) {
+                    }) {
                         Text(text = "Add")
                     }
+                    //Cancel Button on AlertDialog.
                     Button(onClick = { showDialog = false }) {
                         Text(text = "Cancel")
                     }
                 }
             },
+            modifier = Modifier.padding(16.dp),
             title = { Text(text = "Add Shopping Item") },
             text = {
                 Column {
+                    // OutlinedTextField for Enter Item Name
                     OutlinedTextField(
                         value = itemName,
                         onValueChange = { itemName = it },
@@ -106,6 +115,7 @@ fun ShoppingListApp() {
                             .fillMaxWidth()
                             .padding(8.dp)
                     )
+                    // OutlinedTextField for Enter Item Quantity
                     OutlinedTextField(
                         value = itemQuantity,
                         onValueChange = { itemQuantity = it },
@@ -123,18 +133,18 @@ fun ShoppingListApp() {
 @Composable
 fun ShoppingListItem(
     item: ShoppingItem,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onEditClick: ()-> Unit,
+    onDeleteClick: ()-> Unit,
 ){
     Row(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(8.dp)
+            .fillMaxWidth()
             .border(
-                border = BorderStroke(2.dp, color = Color(0XFF018786)),
+                border = BorderStroke(2.dp, Color(0XFF018786)),
                 shape = RoundedCornerShape(20)
             )
-    ){
+    ) {
         Text(text = item.name, modifier = Modifier.padding(8.dp))
     }
 }
